@@ -9,7 +9,15 @@ const port = process.env.PORT || 5050;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://sign-login-frontend.netlify.app",
+      "http://localhost:5000/",
+    ],
+    credentials: true,
+  }),
+);
 
 // Home route
 app.get("/", (req, res) => {
