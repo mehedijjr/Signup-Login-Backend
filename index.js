@@ -9,40 +9,42 @@ const port = process.env.PORT || 5050;
 
 // Middleware
 app.use(express.json());
+
 app.use(
   cors({
     origin: [
       "https://sign-login-frontend.netlify.app",
-      "http://localhost:5000/",
+      "http://localhost:5173",
+      "http://localhost:5000",
     ],
     credentials: true,
-  }),
+  })
 );
+
+// Vercel Serverless- Database Connection Middleware
+app.use(async (req, res, next) => {
+  try {
+    await connectDb();
+    next();
+  } catch (error) {
+    console.error("Database connection error:", error);
+    res.status(500).json({ message: "Database connection failed" });
+  }
+});
 
 // Home route
 app.get("/", (req, res) => {
   res.send("Hello Mehedi");
 });
 
-// signup
+// Routes
 app.use("/api", signUpRouter);
-
-// login
 app.use("/api", loginRouter);
 
-// Database + Server
-const startServer = async () => {
-  try {
-    await connectDb();
-
-    app.listen(port, () => {
-      console.log(`Server running at: http://localhost:${port}`);
-    });
-  } catch (error) {
-    console.log("Server start failed:", error);
-  }
-};
-
-startServer();
+if (process.env.NODE_ENV !== "production") {
+  app.listen(port, () => {
+    console.log(`Server running at: http://localhost:${port}`);
+  });
+}
 
 export default app;
